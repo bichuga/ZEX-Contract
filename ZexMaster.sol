@@ -1125,7 +1125,7 @@ contract ZexMaster is Ownable {
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when EGG mining starts.
+    // The block number when Zex mining starts.
     uint256 public startBlock;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -1185,7 +1185,7 @@ contract ZexMaster is Ownable {
     }
 
     // View function to see pending ZEX on frontend.
-    function pendingEgg(uint256 _pid, address _user) external view returns (uint256) {
+    function pendingZex(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accZexPerShare = pool.accZexPerShare;
@@ -1225,7 +1225,7 @@ contract ZexMaster is Ownable {
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to MasterChef for EGG allocation.
+    // Deposit LP tokens to ZexMaster for ZEX allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -1233,7 +1233,7 @@ contract ZexMaster is Ownable {
         if (user.amount > 0) {
             uint256 pending = user.amount.mul(pool.accZexPerShare).div(1e12).sub(user.rewardDebt);
             if(pending > 0) {
-                safeEggTransfer(msg.sender, pending);
+                safeZexTransfer(msg.sender, pending);
             }
         }
         if(_amount > 0) {
@@ -1250,7 +1250,7 @@ contract ZexMaster is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-    // Withdraw LP tokens from MasterChef.
+    // Withdraw LP tokens from ZexMaster.
     function withdraw(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -1258,7 +1258,7 @@ contract ZexMaster is Ownable {
         updatePool(_pid);
         uint256 pending = user.amount.mul(pool.accZexPerShare).div(1e12).sub(user.rewardDebt);
         if(pending > 0) {
-            safeEggTransfer(msg.sender, pending);
+            safeZexTransfer(msg.sender, pending);
         }
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
@@ -1279,8 +1279,8 @@ contract ZexMaster is Ownable {
         emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe egg transfer function, just in case if rounding error causes pool to not have enough EGGs.
-    function safeEggTransfer(address _to, uint256 _amount) internal {
+    // Safe ZEX transfer function, just in case if rounding error causes pool to not have enough ZEX.
+    function safeZexTransfer(address _to, uint256 _amount) internal {
         uint256 ZexBal = Zex.balanceOf(address(this));
         if (_amount > ZexBal) {
             Zex.transfer(_to, ZexBal);
